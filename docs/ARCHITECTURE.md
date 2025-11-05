@@ -25,6 +25,6 @@ graph TD
 
 ## Security
 - Row Level Security on every table with least privilege policies.
-- Strict headers via `next-secure-headers`.
+- Strict headers configured directly in `next.config.mjs`.
 - Input validation using Zod in server actions and API routes.
 - Stripe webhook verified with signed secret inside Edge Function.
