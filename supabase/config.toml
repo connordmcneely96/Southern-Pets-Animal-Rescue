@@ -1,0 +1,8 @@
+project_id = "southern-pets-animal-rescue"
+[api]
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public"]
+
+[db]
+shadow_port = 54322
