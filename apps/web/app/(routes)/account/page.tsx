@@ -9,6 +9,19 @@ export const metadata: Metadata = {
 
 export default async function AccountPage() {
   const supabase = createServerSupabaseClient();
+
+  if (!supabase) {
+    return (
+      <section className="space-y-6">
+        <h1 className="text-4xl font-semibold text-stone-900">Sign in or create an account</h1>
+        <p className="text-stone-600">
+          Supabase credentials are not configured. Add <code>NEXT_PUBLIC_SUPABASE_URL</code> and
+          <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to enable authentication in development.
+        </p>
+      </section>
+    );
+  }
+
   const {
     data: { session }
   } = await supabase.auth.getSession();

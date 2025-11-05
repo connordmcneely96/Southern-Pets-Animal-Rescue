@@ -2,6 +2,25 @@ import { createServerSupabaseClient } from '../lib/supabase/server';
 
 export async function UpcomingEvents() {
   const supabase = createServerSupabaseClient();
+
+  if (!supabase) {
+    return (
+      <section className="space-y-6">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="text-3xl font-semibold text-stone-900">Upcoming events</h2>
+            <p className="text-stone-600">
+              Add Supabase credentials to display scheduled events from your database.
+            </p>
+          </div>
+        </div>
+        <div className="rounded-2xl bg-stone-100 p-8 text-center text-stone-600">
+          <p>Populate <code>NEXT_PUBLIC_SUPABASE_URL</code> and <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to load events.</p>
+        </div>
+      </section>
+    );
+  }
+
   const { data } = await supabase
     .from('events')
     .select('id, title, location, start_at, end_at, registration_url')

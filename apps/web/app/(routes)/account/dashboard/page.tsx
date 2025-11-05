@@ -8,6 +8,19 @@ export const metadata: Metadata = {
 
 export default async function DashboardPage() {
   const supabase = createServerSupabaseClient();
+
+  if (!supabase) {
+    return (
+      <section className="space-y-6">
+        <h1 className="text-4xl font-semibold text-stone-900">Welcome back</h1>
+        <p className="text-stone-600">
+          Supabase credentials are missing. Add the required environment variables to access the account
+          dashboard.
+        </p>
+      </section>
+    );
+  }
+
   const {
     data: { user }
   } = await supabase.auth.getUser();
@@ -20,8 +33,7 @@ export default async function DashboardPage() {
     <section className="space-y-6">
       <h1 className="text-4xl font-semibold text-stone-900">Welcome back, {user.email}</h1>
       <p className="text-lg text-stone-600">
-        Manage your applications, donations, and foster information. Additional admin tools are coming
-        soon.
+        Manage your applications, donations, and foster information. Additional admin tools are coming soon.
       </p>
     </section>
   );
