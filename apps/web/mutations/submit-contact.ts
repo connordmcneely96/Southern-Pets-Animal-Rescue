@@ -17,6 +17,13 @@ export async function submitContact(input: z.infer<typeof schema>) {
   }
 
   const supabase = createServerSupabaseClient();
+  if (!supabase) {
+    return {
+      ok: false,
+      error: 'Supabase is not configured. Update your environment variables to capture contact requests.'
+    };
+  }
+
   const { error } = await supabase.from('contact_requests').insert({
     name: parsed.data.name,
     email: parsed.data.email,

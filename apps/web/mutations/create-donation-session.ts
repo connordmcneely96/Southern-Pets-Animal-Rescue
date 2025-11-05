@@ -45,12 +45,16 @@ export async function createDonationSession(input: { amount: number; recurring: 
   });
 
   const supabase = createServerSupabaseClient();
-  await supabase.from('donation_intents').insert({
-    amount: parsed.data.amount,
-    recurring: parsed.data.recurring,
-    stripe_session_id: session.id,
-    status: 'initiated'
-  });
+  if (supabase) {
+    await supabase.from('donation_intents').insert({
+      amount: parsed.data.amount,
+      recurring: parsed.data.recurring,
+      stripe_session_id: session.id,
+      status: 'initiated'
+    });
+  } else if (process.env.NODE_ENV !== 'production') {
+    console.warn('Skipping donation intent logging because Supabase is not configured.');
+  }
 
   cookies().set('lastDonationIntent', session.id, { path: '/', httpOnly: true, sameSite: 'lax' });
 

@@ -32,6 +32,19 @@ export function AuthForm() {
 
   const supabase = createClient();
 
+  if (!supabase) {
+    return (
+      <div className="rounded-3xl bg-white p-8 shadow-sm">
+        <h2 className="text-xl font-semibold text-stone-900">Authentication unavailable</h2>
+        <p className="mt-2 text-sm text-stone-600">
+          Supabase environment variables are not configured. Update your <code>.env</code> file with
+          <code>NEXT_PUBLIC_SUPABASE_URL</code> and <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to enable
+          account features.
+        </p>
+      </div>
+    );
+  }
+
   const onSubmit = (values: FormValues) => {
     startTransition(async () => {
       if (mode === 'sign-in') {

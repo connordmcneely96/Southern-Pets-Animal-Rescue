@@ -1,22 +1,21 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '../../../lib/supabase/server';
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const sessionId = searchParams.get('session_id');
-  if (!sessionId) {
-    return NextResponse.json({ error: 'session_id is required' }, { status: 400 });
-  }
+export async function POST(request: Request) {
   const supabase = createServerSupabaseClient();
-  const { data, error } = await supabase
-    .from('donation_intents')
-    .select('*')
-    .eq('stripe_session_id', sessionId)
-    .single();
+  if (!supabase) {
+    return NextResponse.json(
+      { error: 'Supabase is not configured. Set the environment variables to record donations.' },
+      { status: 503 }
+    );
+  }
+
+  const body = await request.json();
+  const { error } = await supabase.from('donations').insert(body);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 404 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ donation: data });
+  return NextResponse.json({ ok: true });
 }

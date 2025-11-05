@@ -19,6 +19,13 @@ export async function registerVolunteer(input: z.infer<typeof schema>) {
   }
 
   const supabase = createServerSupabaseClient();
+  if (!supabase) {
+    return {
+      ok: false,
+      error: 'Supabase is not configured. Add your project credentials to store volunteer registrations.'
+    };
+  }
+
   const { error } = await supabase.from('volunteer_applications').insert({
     full_name: parsed.data.fullName,
     email: parsed.data.email,

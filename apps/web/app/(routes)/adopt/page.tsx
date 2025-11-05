@@ -9,6 +9,27 @@ export const metadata: Metadata = {
 
 export default async function AdoptPage() {
   const supabase = createServerSupabaseClient();
+
+  if (!supabase) {
+    return (
+      <section className="space-y-6">
+        <div className="space-y-3">
+          <h1 className="text-4xl font-semibold text-stone-900">Find your new companion</h1>
+          <p className="text-lg text-stone-600">
+            Every adoption includes age-appropriate vaccinations, microchip registration, and spay/neuter
+            surgery.
+          </p>
+        </div>
+        <div className="rounded-3xl bg-stone-100 p-10 text-center text-stone-600">
+          <p>
+            Supabase is not configured. Add your project credentials to <code>.env</code> to browse adoption
+            listings locally.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
   const { data: animals } = await supabase
     .from('animals')
     .select('*')

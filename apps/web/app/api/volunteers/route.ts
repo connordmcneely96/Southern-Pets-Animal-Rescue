@@ -1,32 +1,17 @@
 import { NextResponse } from 'next/server';
-import { z } from 'zod';
 import { createServerSupabaseClient } from '../../../lib/supabase/server';
-
-const schema = z.object({
-  full_name: z.string().min(2),
-  email: z.string().email(),
-  phone: z.string().min(10),
-  interests: z.array(z.string()).min(1),
-  availability: z.string().min(2),
-  skills: z.string().optional()
-});
 
 export async function POST(request: Request) {
   const supabase = createServerSupabaseClient();
-  const payload = await request.json();
-  const parsed = schema.safeParse(payload);
-  if (!parsed.success) {
-    return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
+  if (!supabase) {
+    return NextResponse.json(
+      { error: 'Supabase is not configured. Set the required environment variables to accept volunteers.' },
+      { status: 503 }
+    );
   }
 
-  const { error } = await supabase.from('volunteer_applications').insert({
-    full_name: parsed.data.full_name,
-    email: parsed.data.email,
-    phone: parsed.data.phone,
-    interests: parsed.data.interests,
-    availability: parsed.data.availability,
-    skills: parsed.data.skills ?? null
-  });
+  const body = await request.json();
+  const { error } = await supabase.from('volunteer_applications').insert(body);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

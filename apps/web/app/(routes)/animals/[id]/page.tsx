@@ -9,6 +9,11 @@ interface AnimalPageProps {
 
 export async function generateMetadata({ params }: AnimalPageProps): Promise<Metadata> {
   const supabase = createServerSupabaseClient();
+
+  if (!supabase) {
+    return { title: 'Animal profile | Southern Pets Animal Rescue' };
+  }
+
   const { data: animal } = await supabase
     .from('animals')
     .select('name, summary')
@@ -27,6 +32,20 @@ export async function generateMetadata({ params }: AnimalPageProps): Promise<Met
 
 export default async function AnimalPage({ params }: AnimalPageProps) {
   const supabase = createServerSupabaseClient();
+
+  if (!supabase) {
+    return (
+      <article className="space-y-6">
+        <div className="rounded-3xl bg-stone-100 p-10 text-center text-stone-600">
+          <p>
+            Supabase environment variables are missing. Update <code>NEXT_PUBLIC_SUPABASE_URL</code> and
+            <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to view animal profiles locally.
+          </p>
+        </div>
+      </article>
+    );
+  }
+
   const { data: animal } = await supabase
     .from('animals')
     .select('*')
