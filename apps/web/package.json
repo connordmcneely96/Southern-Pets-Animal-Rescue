@@ -25,7 +25,6 @@
     "drizzle-orm": "^0.29.2",
     "lucide-react": "^0.379.0",
     "next": "14.2.3",
-    "next-secure-headers": "^2.2.0",
     "next-sitemap": "^4.2.3",
     "next-themes": "^0.3.0",
     "react": "^18.3.1",
