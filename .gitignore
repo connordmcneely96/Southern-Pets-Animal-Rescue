@@ -1,0 +1,11 @@
+node_modules
+.next
+out
+pnpm-lock.yaml
+supabase/.temp
+supabase/.branches
+supabase/.db
+.DS_Store
+.playwright-report
+.test-results
+.env

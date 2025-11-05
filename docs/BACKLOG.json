@@ -1,0 +1,46 @@
+[
+  {
+    "id": "SEC-01",
+    "title": "Add request rate limiting middleware",
+    "severity": "High",
+    "category": "Security",
+    "effort": "Medium",
+    "files": ["apps/web/middleware.ts"],
+    "patch": "--- a/apps/web/middleware.ts\n+++ b/apps/web/middleware.ts\n@@\n-import { NextResponse } from 'next/server';\n+import { NextResponse } from 'next/server';\n+import { kv } from '@vercel/kv';\n+\n+const WINDOW = 60;\n+const LIMIT = 20;\n+\n+export async function middleware(request: Request) {\n+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '127.0.0.1';\n+  const key = `ratelimit:${ip}`;\n+  const count = ((await kv.incr(key)) ?? 0) as number;\n+  if (count === 1) {\n+    await kv.expire(key, WINDOW);\n+  }\n+  if (count > LIMIT) {\n+    return new NextResponse('Too many requests', { status: 429 });\n+  }\n+  return NextResponse.next();\n+}" 
+  },
+  {
+    "id": "SEO-02",
+    "title": "Add JSON-LD structured data for adoptable animals",
+    "severity": "Medium",
+    "category": "SEO",
+    "effort": "Small",
+    "files": ["apps/web/app/(routes)/animals/[id]/page.tsx"],
+    "patch": "--- a/apps/web/app/(routes)/animals/[id]/page.tsx\n+++ b/apps/web/app/(routes)/animals/[id]/page.tsx\n@@\n-  return (\n-    <article className=\"space-y-6\">\n+  const jsonLd = {\n+    '@context': 'https://schema.org',\n+    '@type': 'Product',\n+    name: animal.name,\n+    description: animal.summary,\n+    sku: animal.id,\n+    offers: {\n+      '@type': 'Offer',\n+      availability: animal.status === 'available' ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',\n+      price: 150,\n+      priceCurrency: 'USD'\n+    }\n+  };\n+  return (\n+    <article className=\"space-y-6\">\n+      <script type=\"application/ld+json\" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />\n       <div className=\"grid gap-6 md:grid-cols-[2fr_1fr]\">" 
+  },
+  {
+    "id": "A11Y-01",
+    "title": "Run axe-core accessibility checks in Playwright",
+    "severity": "Medium",
+    "category": "Accessibility",
+    "effort": "Small",
+    "files": ["tests/e2e/home.spec.ts"],
+    "patch": "--- a/tests/e2e/home.spec.ts\n+++ b/tests/e2e/home.spec.ts\n@@\n-import { test, expect } from '@playwright/test';\n+import { test, expect } from '@playwright/test';\n+import AxeBuilder from '@axe-core/playwright';\n@@\n   await expect(page.getByRole('heading', { name: /rescue, rehabilitate/i })).toBeVisible();\n   await expect(page.getByRole('link', { name: /view adoptable pets/i })).toBeVisible();\n+  const accessibilityScanResults = await new AxeBuilder({ page }).analyze();\n+  expect(accessibilityScanResults.violations).toEqual([]);\n });" 
+  },
+  {
+    "id": "OBS-01",
+    "title": "Add structured logging for server actions",
+    "severity": "Low",
+    "category": "Observability",
+    "effort": "Medium",
+    "files": ["apps/web/mutations/create-donation-session.ts", "apps/web/mutations/register-volunteer.ts", "apps/web/mutations/submit-contact.ts"],
+    "patch": "--- a/apps/web/mutations/create-donation-session.ts\n+++ b/apps/web/mutations/create-donation-session.ts\n@@\n-import { z } from 'zod';\n+import { z } from 'zod';\n+import pino from 'pino';\n+\n+const logger = pino({ name: 'donations' });\n@@\n-    return { ok: false, error: 'Invalid input' };\n+    logger.warn({ input }, 'invalid donation input');\n+    return { ok: false, error: 'Invalid input' };\n@@\n-    return { ok: false, error: 'Stripe is not configured' };\n+    logger.error('Stripe not configured');\n+    return { ok: false, error: 'Stripe is not configured' };\n@@\n-  const session = await stripe.checkout.sessions.create({\n+  const session = await stripe.checkout.sessions.create({\n..." 
+  },
+  {
+    "id": "INT-01",
+    "title": "Send notification emails for contact requests",
+    "severity": "Medium",
+    "category": "Integration",
+    "effort": "Large",
+    "files": ["apps/web/mutations/submit-contact.ts"],
+    "patch": "--- a/apps/web/mutations/submit-contact.ts\n+++ b/apps/web/mutations/submit-contact.ts\n@@\n-import { createServerSupabaseClient } from '../lib/supabase/server';\n+import { createServerSupabaseClient } from '../lib/supabase/server';\n+import { Resend } from 'resend';\n@@\n-  const { error } = await supabase.from('contact_requests').insert({\n+  const { error } = await supabase.from('contact_requests').insert({\n     name: parsed.data.name,\n     email: parsed.data.email,\n     message: parsed.data.message,\n     topic: parsed.data.topic\n   });\n\n   if (error) {\n+    console.error('Failed to store contact request', error);\n     return { ok: false, error: error.message };\n   }\n\n+  if (process.env.RESEND_API_KEY && process.env.CONTACT_NOTIFICATION_EMAIL) {\n+    const resend = new Resend(process.env.RESEND_API_KEY);\n+    await resend.emails.send({\n+      from: 'Southern Pets <no-reply@southernpets.org>',\n+      to: process.env.CONTACT_NOTIFICATION_EMAIL,\n+      subject: `New ${parsed.data.topic} inquiry`,\n+      html: `<p>${parsed.data.message}</p><p>From: ${parsed.data.name} (${parsed.data.email})</p>`\n+    });\n+  }\n+
+  return { ok: true };\n }

@@ -1,0 +1,25 @@
+{
+  "name": "southern-pets-animal-rescue",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@8.15.6",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "prepare": "husky install",
+    "postinstall": "pnpm -r exec echo 'workspace ready'",
+    "lint": "pnpm --filter web lint",
+    "test": "pnpm --filter web test",
+    "build": "pnpm --filter web build",
+    "dev": "pnpm --filter web dev",
+    "e2e": "pnpm --filter web e2e",
+    "format": "pnpm --filter web format"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^18.6.1",
+    "@commitlint/config-conventional": "^18.6.2",
+    "husky": "^9.0.11"
+  }
+}
