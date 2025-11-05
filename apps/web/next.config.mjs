@@ -1,7 +1,11 @@
 import { createSecureHeaders } from 'next-secure-headers';
 
+const isProd = process.env.NODE_ENV === 'production';
+
 const securityHeaders = createSecureHeaders({
-  forceHTTPSRedirect: [{ includeSubDomains: true }],
+  forceHTTPSRedirect: isProd
+    ? [true, { maxAge: 63072000, includeSubDomains: true, preload: true }]
+    : [false],
   referrerPolicy: 'no-referrer-when-downgrade',
   contentSecurityPolicy: {
     directives: {
